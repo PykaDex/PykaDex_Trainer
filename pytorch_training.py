@@ -10,12 +10,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
+from pathlib import *
+
 
 #Location of training
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 #Loading Training Data
-training_data = np.load("Compiled_Data/Pokemon_color2_80.npy", allow_pickle = True)
+load_path = PurePath("../PykaDex_Data/Data/numpy_files/Pokemon_Data_Colour_GenX_80.npy")
+training_data = np.load(load_path, allow_pickle = True)
 
 #Separating Data into training and testing data
 IMG_SIZE = 80
