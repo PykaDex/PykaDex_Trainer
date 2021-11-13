@@ -1,3 +1,3 @@
 # PykaDex Trainer
 
-PykaDex reposistory for creating and optimizing, Image classification neural networks designed for pokemon.
+A [PykaDex](https://github.com/PykaDex) reposistory for creating and optimizing, Image classification neural networks designed for pokemon.
