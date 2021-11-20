@@ -12,13 +12,22 @@ import torch.optim as optim
 import torchvision
 from pathlib import *
 
+print('running')
 
 #Location of training
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 #Loading Training Data
-load_path = PurePath("../PykaDex_Data/Data/numpy_files/Pokemon_Data_Colour_GenX_80.npy")
-training_data = np.load(load_path, allow_pickle = True)
+clean_data_path = PurePath("../PykaDex_Data/Data/numpy_files/Pokemon_Data_Colour_GenX_80.npy")
+bgswap_data_path = PurePath("../PykaDex_Data/Data/numpy_files/Pokemon_Data_Colour_GenX_BGswap_80.npy")
+augmented_data_path = PurePath("../PykaDex_Data/Data/numpy_files/Pokemon_Data_Colour_GenX_Augmented_80.npy")
+
+training_data_clean = np.load(clean_data_path, allow_pickle = True)
+training_data_bgswap = np.load(bgswap_data_path, allow_pickle = True)
+training_data_augmented = np.load(augmented_data_path, allow_pickle = True)
+
+#training_data = np.concatenate((training_data_clean, training_data_bgswap, training_data_augmented), axis=0)
+training_data = training_data_clean
 
 #Separating Data into training and testing data
 IMG_SIZE = 80
@@ -71,6 +80,11 @@ def train(net):
 
         print(f"Epoch: {epoch + 1}. Loss: {loss}")
 
+############################
+# chose which model to train
+############################
+
+
 #Accuracy
 def test(net):
     correct = 0
@@ -95,7 +109,7 @@ test(net)
 #Saving model
 model_file_name = "model_trial_pokemon_3_2.pth"
 model_directory = "Trained_models"
-new_path = model_directory + "/" + model_file_name
+new_path = PurePath(model_directory, model_file_name)
 
 answer = input("Would you like to save this model? (y/n) ")
 
@@ -103,7 +117,7 @@ if answer == "y":
     if not os.path.exists(model_directory):
         os.makedirs(model_directory)
         torch.save(net.state_dict(), new_path)
-        print("=> Download complete. Good Bye!")
+        print("=> Download complete . Good Bye!")
     if os.path.exists(model_directory):
         torch.save(net.state_dict(), new_path)
 elif answer == "n":
@@ -112,3 +126,4 @@ elif answer == "n":
 else:
     print("Hmmm not sure what you wrote... soooo.... bye!")
     quit()
+
