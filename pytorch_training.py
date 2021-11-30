@@ -57,7 +57,7 @@ net.classifier[6] = nn.Linear(4096,3)
 
 net.to(device)
 
-#ptimizer and Loss function
+#Optimizer and Loss function
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 loss_function = nn.MSELoss()
 
