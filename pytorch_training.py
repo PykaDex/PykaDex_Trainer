@@ -12,7 +12,7 @@ import torch.optim as optim
 import torchvision
 from pathlib import *
 
-print('running')
+print('Running...')
 
 #Location of training
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -109,7 +109,7 @@ test(net)
 #Saving model
 model_file_name = "model_trial_pokemon_3_2.pth"
 model_directory = "Trained_models"
-new_path = PurePath(model_directory, model_file_name)
+new_path = os.path.join(model_directory, model_file_name)
 
 answer = input("Would you like to save this model? (y/n) ")
 
