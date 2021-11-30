@@ -1,5 +1,6 @@
 import os
 import cv2
+import time 
 from tqdm import tqdm
 
 import numpy as np
@@ -61,53 +62,56 @@ optimizer = optim.Adam(net.parameters(), lr=0.001)
 loss_function = nn.MSELoss()
 
 #Training
-BATCH_SIZE = 64
-EPOCHS = 20
+def fwd_pass(X, y, train=False):
 
+    if train:
+        net.zero_grad()
+    outputs = net(X)
+    matches  = [torch.argmax(i)==torch.argmax(j) for i, j in zip(outputs, y)]
+    acc = matches.count(True)/len(matches)
+    loss = loss_function(outputs, y)
+
+    if train:
+        loss.backward()
+        optimizer.step()
+
+    return acc, loss
+
+def test(size):
+    X, y = test_X[:size], test_y[:size]
+    val_acc, val_loss = fwd_pass(X.view(-1,3,IMG_SIZE,IMG_SIZE).to(device), y.to(device))
+    return val_acc, val_loss
+
+MODEL_NAME = f"model-{int(time.time())}"  # gives a dynamic model name, to just help with things getting messy over time. 
+
+BATCH_SIZE = 100
+EPOCHS = 3
 def train(net):
-    for epoch in range(EPOCHS):
-        for i in tqdm(range(0, len(train_X), BATCH_SIZE)): # from 0, to the len of x, stepping BATCH_SIZE at a time. [:50] ..for now just to dev
-           
-            batch_X = train_X[i:i+BATCH_SIZE].view(-1, 3, IMG_SIZE, IMG_SIZE)
-            batch_y = train_y[i:i+BATCH_SIZE]
 
-            net.zero_grad()
+    with open("model.log", "a") as f: #creates a log file with all the accuracies and losses saved
+        for epoch in range(EPOCHS):
+            for i in tqdm(range(0, len(train_X), BATCH_SIZE)):
+                batch_X = train_X[i:i+BATCH_SIZE].view(-1,3,IMG_SIZE,IMG_SIZE)
+                batch_y = train_y[i:i+BATCH_SIZE]
 
-            outputs = net(batch_X)
-            loss = loss_function(outputs, batch_y)
-            loss.backward()
-            optimizer.step()    # Does the update
+                batch_X, batch_y = batch_X.to(device), batch_y.to(device)
 
-        print(f"Epoch: {epoch + 1}. Loss: {loss}")
+                acc, loss = fwd_pass(batch_X, batch_y, train=True)
+
+                if i % 32 == 0:
+                    val_acc, val_loss = test(BATCH_SIZE)
+                    f.write(f"{MODEL_NAME},{round(time.time(),3)},{round(float(acc),2)},{round(float(loss), 4)},{round(float(val_acc),2)},{round(float(val_loss),4)},{epoch}\n")
 
 ############################
 # chose which model to train
 ############################
 
 
-#Accuracy
-def test(net):
-    correct = 0
-    total = 0
-    with torch.no_grad():
-        for i in tqdm(range(len(test_X))):
-            real_class = torch.argmax(test_y[i])
-            net_out = net(test_X[i].view(-1, 3, IMG_SIZE, IMG_SIZE))[0]
-            predicted_class = torch.argmax(net_out)
-
-            if predicted_class == real_class:
-                correct += 1
-            total += 1
-
-    print("Accuracy: ", round(correct/total, 3))
-
-
 #Calling Functions
 train(net)
-test(net)
 
 #Saving model
-model_file_name = "model_trial_pokemon_3_2.pth"
+model_file_name = f"Model_pokemon_{IMG_SIZE}_{EPOCHS}.pth"
 model_directory = "Trained_models"
 new_path = os.path.join(model_directory, model_file_name)
 
