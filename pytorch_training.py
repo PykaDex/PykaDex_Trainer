@@ -52,7 +52,6 @@ net = torchvision.models.vgg16(pretrained=True)
 for param in net.parameters():
     param.requires_grad = False
 
-net.features[0] = nn.Conv2d(3,64,kernel_size=(3,3), stride=(1,1), padding=(1,1))
 net.classifier[6] = nn.Linear(4096,3)
 
 net.to(device)
